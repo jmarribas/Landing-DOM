@@ -63,7 +63,15 @@ const toyStore = [
   },
 ];
 
+let filterToys = toyStore;
+
+const filters = document.getElementById('filters')
+const filtersDiv = document.createElement('div');
+filtersDiv.className = 'filtersDiv';
+filters.appendChild(filtersDiv);
+
 const printProducts = (toys) => {
+
   const products = document.getElementById('products')
   products.innerHTML = "";
   const productContainer = document.createElement('div');
@@ -103,96 +111,106 @@ const printProducts = (toys) => {
   }
 }
 
-const filters = document.getElementById('filters')
-const filtersDiv = document.createElement('div');
-filtersDiv.className = 'filtersDiv';
-filters.appendChild(filtersDiv);
+const menu = () => {
+  filtersDiv.innerHTML = '';
 
-const printFilterMenu = () => {
+  const printFilterMenu = () => {
+    const filterText = document.createElement('h4');
+    filterText.textContent = 'Filtra por vendedor:';
+    const categorySelect = document.createElement('select');
+    filtersDiv.appendChild(filterText);
+    filtersDiv.appendChild(categorySelect);
 
-  const filterText = document.createElement('h4');
-  filterText.textContent = 'Filtra por vendedor:';
-  const categorySelect = document.createElement('select');
-  filtersDiv.appendChild(filterText);
-  filtersDiv.appendChild(categorySelect);
+    const allOption = document.createElement('option');
+    allOption.value = 'todos';
+    allOption.textContent = 'Todos';
+    categorySelect.appendChild(allOption);
 
-  const allOption = document.createElement('option');
-  allOption.value = 'todos';
-  allOption.textContent = 'Todos';
-  categorySelect.appendChild(allOption);
+    const removeSeller = (filterToys) => {
+      const filtersArray = [];
+      filterToys.forEach(toy => {
+        if (!filtersArray.includes(toy.seller)) {
+          filtersArray.push(toy.seller)
 
-  const removeSeller = (toyStore) => {
-    const filtersArray = [];
-    toyStore.forEach(toy => {
-      if (!filtersArray.includes(toy.seller)) {
-        filtersArray.push(toy.seller)
+          const option = document.createElement('option');
+          option.value = toy.seller;
+          option.textContent = toy.seller;
+          categorySelect.appendChild(option);
+        }
 
-        const option = document.createElement('option');
-        option.value = toy.seller;
-        option.textContent = toy.seller;
-        categorySelect.appendChild(option);
-      }
+      });
+    };
+    removeSeller(filterToys);
 
+    categorySelect.addEventListener('change', (e) => {
+      filterSeller(e);
+    })
+
+  }
+
+  const printFilterPrice = () => {
+    const filterPriceText = document.createElement('h4');
+    filterPriceText.textContent = 'Filtra por precio:';
+    const inputPriceForm = document.createElement('form');
+    const inputPrice = document.createElement('input');
+    const inputPriceButton = document.createElement('button');
+    inputPriceButton.textContent = 'Buscar';
+    inputPriceButton.classList.add('inputPriceButton');
+    inputPrice.type = "number";
+
+
+    filtersDiv.appendChild(filterPriceText);
+    filtersDiv.appendChild(inputPriceForm);
+    inputPriceForm.appendChild(inputPrice);
+    inputPriceForm.appendChild(inputPriceButton);
+
+    inputPriceButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      filterPrice(inputPrice.value);
+      inputPrice.value = "";
     });
-  };
-  removeSeller(toyStore);
+  }
 
-  categorySelect.addEventListener('change', (e) => {
-    filterSeller(e);
-  })
+  const resetFilters = () => {
+    const buttonReset = document.createElement("button");
+    buttonReset.textContent = "Borrar";
+    filtersDiv.appendChild(buttonReset);
 
-}
-
-const printFilterPrice = () => {
-  const filterPriceText = document.createElement('h4');
-  filterPriceText.textContent = 'Filtra por precio:';
-  const inputPriceForm = document.createElement('form');
-  const inputPrice = document.createElement('input');
-  const inputPriceButton = document.createElement('button');
-  inputPriceButton.textContent = 'Buscar';
-  inputPriceButton.classList.add('inputPriceButton');
-  inputPrice.type = "number";
-
-
-  filtersDiv.appendChild(filterPriceText);
-  filtersDiv.appendChild(inputPriceForm);
-  inputPriceForm.appendChild(inputPrice);
-  inputPriceForm.appendChild(inputPriceButton);
-
-  inputPriceButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    filterPrice(inputPrice.value);
-    inputPrice.value = "";
-  });
+    buttonReset.addEventListener("click", () => {
+      filtersDiv.innerHTML = ""
+      filterToys = toyStore
+      printProducts(filterToys)
+      printFilterMenu()
+      printFilterPrice();
+      resetFilters();
+    });
+  }
+  printFilterMenu()
+  printFilterPrice()
+  resetFilters()
 }
 
 const filterSeller = (e) => {
-  if (e.target.value === 'todos') { printProducts(toyStore) }
-  else { printProducts(toyStore.filter(toy => toy.seller === e.target.value)) }
+  if (e.target.value === 'todos') {
+    filterToys = toyStore
+    menu()
+    printProducts(filterToys)
+  }
+  else {
+    filterToys = filterToys.filter(toy => toy.seller === e.target.value)
+    menu()
+    printProducts(filterToys)
+  }
 }
 
 const filterPrice = (price) => {
   toyStore.forEach(toy => {
-    printProducts(toyStore.filter(toy => toy.price <= price))
+    filterToys = filterToys.filter(toy => toy.price <= price)
+    printProducts(filterToys)
   });
+  menu()
+
 }
 
-const resetFilters = () => {
-  const buttonReset = document.createElement("button");
-  buttonReset.textContent = "Borrar";
-  filtersDiv.appendChild(buttonReset);
-
-  buttonReset.addEventListener("click", () => {
-    filtersDiv.innerHTML = ""
-    printProducts(toyStore)
-    printFilterMenu()
-    printFilterPrice();
-    resetFilters();
-  });
-}
-
-
-printProducts(toyStore);
-printFilterMenu();
-printFilterPrice();
-resetFilters();
+printProducts(filterToys);
+menu();
