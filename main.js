@@ -126,8 +126,8 @@ const menu = () => {
     allOption.textContent = 'Todos';
     categorySelect.appendChild(allOption);
 
+    const filtersArray = [];
     const removeSeller = (filterToys) => {
-      const filtersArray = [];
       filterToys.forEach(toy => {
         if (!filtersArray.includes(toy.seller)) {
           filtersArray.push(toy.seller)
@@ -141,6 +141,10 @@ const menu = () => {
       });
     };
     removeSeller(filterToys);
+    console.log(filtersArray);
+
+    const selectedSeller = filtersArray.length === 1 ? filterToys[0].seller : 'todos';
+    categorySelect.value = selectedSeller;
 
     categorySelect.addEventListener('change', (e) => {
       filterSeller(e);
